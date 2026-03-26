@@ -98,12 +98,52 @@ const gameController = ((gameBoard) => {
 
     const endGame = () => {
         document.querySelector("h1").innerText = "Game is Over";
+        document.body.removeChild(document.querySelector(".board"));
     }
 
-    return {getWinner, checkIfOver, makeAMove};
+    return {getWinner, checkIfOver, makeAMove, endGame};
 
 })(gameBoard);
+
+let boardDisplay = document.createElement("div");
+boardDisplay.setAttribute("class", "board");
+
+for (let i = 0; i < 9; i++) {
+    let fieldDiv = document.createElement("div");
+    fieldDiv.setAttribute("class", "field-div");
+    fieldDiv.setAttribute("data-id", i);
+    boardDisplay.appendChild(fieldDiv);
+}
+
+boardDisplay.addEventListener("click", (event) => {
+    if (event.target.classList.contains("field-div")) {
+        const fieldId = Number(event.target.dataset.id);
+        const row = Math.floor(fieldId / 3);
+        const col = fieldId % 3;
+        if(gameBoard.getCell(row,col) !== ""){
+            document.querySelector("h1").innerText = "The cell is taken";
+            return;
+        }
+        document.querySelector("h1").innerText = "Nice Move!";
+        gameBoard.setCell(row, col, "X");
+        if (gameController.checkIfOver()) {
+            gameController.endGame();
+        }
+    }
+});
+
+document.body.appendChild(boardDisplay);
+
+
 
 // function createPlayer(name) {
     
 // }
+
+//NOTES:
+
+// index 0 > row 0, col 0(0 / 3=0, 0 % 3=0)
+// index 1 > row 0, col 1(1 / 3=0, 1 % 3=1)
+// index 2 > row 0, col 2(2 / 3=0, 2 % 3=2)
+// index 3 > row 1, col 0(3 / 3=1, 3 % 3=0)
+// index 4 > row 1, col 1(4 / 3=1, 4 % 3=1)
