@@ -7,6 +7,37 @@ const gameBoard = (() => {
         ["", "", ""]
     ];
 
+    const getFreeSpots = () => {
+        const free = [];
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+                if (board[row][col] === "") {
+                    free.push([row, col]);
+                }
+            }
+        }
+        return free;
+    }
+
+    const getCell = (row, col) => {
+        return board[row][col];
+    }
+
+    const setCell = (row, col, mark) => {
+        board[row][col] = mark;
+    }
+
+    const toFlat = () => {
+        return board.flat();
+    }
+
+    return {
+        getCell, setCell, getFreeSpots, toFlat
+    };
+})();
+
+const gameController = ((gameBoard) => {
+    let winner = null;
     const winPatterns = [
         [[0, 0], [0, 1], [0, 2]],
         [[1, 0], [1, 1], [1, 2]],
@@ -20,24 +51,16 @@ const gameBoard = (() => {
         [[0, 2], [1, 1], [2, 0]]
     ]
 
-    return {
-        board, winPatterns
-    };
-})();
-
-const gameController = (() => {
-    let winner = null;
-
-    const checkIfOver = (board, winPatterns) => {
-        if (!board.flat().includes("")) {
+    const checkIfOver = () => {
+        if (!gameBoard.toFlat().includes("")) {
             return true;
         }
 
         for (const pattern of winPatterns) {
             const [[row1, col1], [row2, col2], [row3, col3]] = pattern;
-            const a = board[row1][col1];
-            const b = board[row2][col2];
-            const c = board[row3][col3];
+            const a = gameBoard.getCell(row1, col1);
+            const b = gameBoard.getCell(row2, col2);
+            const c = gameBoard.getCell(row3, col3);
 
             if (a !== "" && a === b && b === c) {
                 winner = a;
@@ -54,33 +77,21 @@ const gameController = (() => {
         return winner;
     }
 
-    function getFreeSpots(board) {
-        const free = [];
-        for (let row = 0; row < 3; row++) {
-            for (let col = 0; col < 3; col++) {
-                if (board[row][col] === "") {
-                    free.push([row, col]);
-                }
-            }
-        }
-        return free;
-    }
-
-    function pickRandomMove(board) {
-        const free = getFreeSpots(board);
+    function pickRandomMove() {
+        const free = gameBoard.getFreeSpots();
         if (free.length === 0) return null;
         const id = Math.floor(Math.random() * free.length);
         return free[id]; 
     }
 
-    const makeAMove = (board, winPatterns) => {
-        const move = pickRandomMove(board);
+    const makeAMove = () => {
+        const move = pickRandomMove();
         if (move) {
             const [row, col] = move;
-            board[row][col] = "O";
+            gameBoard.setCell(row, col, "O");
         }
 
-        if(checkIfOver(board, winPatterns)){
+        if(checkIfOver()){
             endGame();
         }
     }
@@ -91,7 +102,7 @@ const gameController = (() => {
 
     return {getWinner, checkIfOver, makeAMove};
 
-})();
+})(gameBoard);
 
 // function createPlayer(name) {
     
