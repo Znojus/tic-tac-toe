@@ -129,8 +129,11 @@ boardDisplay.addEventListener("click", (event) => {
         if (gameController.checkIfOver()) {
             gameController.endGame();
         }
+
+        event.target.style.backgroundColor = "lightblue";
     }
 });
+
 
 document.body.appendChild(boardDisplay);
 
