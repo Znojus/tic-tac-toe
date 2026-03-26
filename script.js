@@ -89,6 +89,7 @@ const gameController = ((gameBoard) => {
         if (move) {
             const [row, col] = move;
             gameBoard.setCell(row, col, "O");
+            displayMove(row, col);
         }
 
         if(checkIfOver()){
@@ -131,9 +132,15 @@ boardDisplay.addEventListener("click", (event) => {
         }
 
         event.target.style.backgroundColor = "lightblue";
+        gameController.makeAMove();
     }
 });
 
+function displayMove(row, col) {
+    const index = row * 3 + col; // convert back to flat index
+    const cell = document.querySelector(`[data-id="${index}"]`);
+    cell.style.backgroundColor = "tomato";
+}
 
 document.body.appendChild(boardDisplay);
 
