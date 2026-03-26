@@ -88,12 +88,13 @@ const gameController = ((gameBoard) => {
         const move = pickRandomMove();
         if (move) {
             const [row, col] = move;
-            gameBoard.setCell(row, col, "O");
             displayMove(row, col);
+            gameBoard.setCell(row, col, "O");
         }
 
         if(checkIfOver()){
             endGame();
+            return;
         }
     }
 
@@ -129,8 +130,8 @@ boardDisplay.addEventListener("click", (event) => {
         gameBoard.setCell(row, col, "X");
         if (gameController.checkIfOver()) {
             gameController.endGame();
+            return;
         }
-
         event.target.style.backgroundColor = "lightblue";
         gameController.makeAMove();
     }
