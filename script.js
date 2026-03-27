@@ -52,10 +52,6 @@ const gameController = ((gameBoard) => {
     ]
 
     const checkIfOver = () => {
-        if (!gameBoard.toFlat().includes("")) {
-            return true;
-        }
-
         for (const pattern of winPatterns) {
             const [[row1, col1], [row2, col2], [row3, col3]] = pattern;
             const a = gameBoard.getCell(row1, col1);
@@ -66,6 +62,9 @@ const gameController = ((gameBoard) => {
                 winner = a;
                 return true;
             }
+        }
+        if (!gameBoard.toFlat().includes("")) {
+            return true;
         }
         return false;
     }
@@ -84,7 +83,7 @@ const gameController = ((gameBoard) => {
         return free[id]; 
     }
 
-    const makeAMove = () => {
+    const makeABotMove = () => {
         const move = pickRandomMove();
         if (move) {
             const [row, col] = move;
@@ -98,16 +97,37 @@ const gameController = ((gameBoard) => {
         }
     }
 
-    const endGame = () => {
-        document.querySelector("h1").innerText = "Game is Over";
-        document.body.removeChild(document.querySelector(".board"));
+    function checkIfAvailable (row, col) {
+        if (gameBoard.getCell(row, col) === "") {
+            return true;
+        }
+        else return false;
     }
 
-    return {getWinner, checkIfOver, makeAMove, endGame};
+    const tryAMove = (row, col) => {
+        if (!checkIfAvailable(row, col)) {
+            return "TAKEN";
+        }
+        gameBoard.setCell(row, col, "X");
+
+        if (gameController.checkIfOver()) {
+            gameController.endGame();
+            if (winner === null) return "DRAW";
+            else if (winner === "X") return "X";
+            else return "O";
+        }
+    }
+
+    const endGame = () => {
+        document.querySelector("h1").innerText = "Game is Over";
+        //document.body.removeChild(document.querySelector(".board"));
+    }
+
+    return {getWinner, checkIfOver, makeABotMove, endGame, tryAMove};
 
 })(gameBoard);
 
-const displayController = ((gameBoard) => {
+const displayController = ((gameBoard, gameController) => {
     let boardDisplay = document.createElement("div");
     boardDisplay.setAttribute("class", "board");
 
@@ -123,19 +143,23 @@ const displayController = ((gameBoard) => {
             const fieldId = Number(event.target.dataset.id);
             const row = Math.floor(fieldId / 3);
             const col = fieldId % 3;
-            if (gameBoard.getCell(row, col) !== "") {
-                document.querySelector("h1").innerText = "The cell is taken";
+            let moveResult = gameController.tryAMove(row, col);
+            if (moveResult === "TAKEN") {
+                document.querySelector("h1").innerText = "Place is taken!";
                 return;
             }
-            document.querySelector("h1").innerText = "Nice Move!";
-            gameBoard.setCell(row, col, "X");
-            if (gameController.checkIfOver()) {
-                gameController.endGame();
+            else if (moveResult === "X") {
+                document.querySelector("h1").innerText = "You've won";
                 return;
             }
+            else if (moveResult === "DRAW") {
+                document.querySelector("h1").innerText = "It's a draw!";
+                return;
+            }
+
             displayController.displayBoard();
             setTimeout(() => {
-                gameController.makeAMove();
+                gameController.makeABotMove();
                 displayController.displayBoard();
             }, 500);
         }
@@ -160,7 +184,7 @@ const displayController = ((gameBoard) => {
         }
     }
     return {displayBoard};
-})(gameBoard);
+})(gameBoard, gameController);
 
 
 
