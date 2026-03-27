@@ -88,8 +88,8 @@ const gameController = ((gameBoard) => {
         const move = pickRandomMove();
         if (move) {
             const [row, col] = move;
-            displayMove(row, col);
             gameBoard.setCell(row, col, "O");
+            //--
         }
 
         if(checkIfOver()){
@@ -107,43 +107,60 @@ const gameController = ((gameBoard) => {
 
 })(gameBoard);
 
-let boardDisplay = document.createElement("div");
-boardDisplay.setAttribute("class", "board");
+const displayController = ((gameBoard) => {
+    let boardDisplay = document.createElement("div");
+    boardDisplay.setAttribute("class", "board");
 
-for (let i = 0; i < 9; i++) {
-    let fieldDiv = document.createElement("div");
-    fieldDiv.setAttribute("class", "field-div");
-    fieldDiv.setAttribute("data-id", i);
-    boardDisplay.appendChild(fieldDiv);
-}
-
-boardDisplay.addEventListener("click", (event) => {
-    if (event.target.classList.contains("field-div")) {
-        const fieldId = Number(event.target.dataset.id);
-        const row = Math.floor(fieldId / 3);
-        const col = fieldId % 3;
-        if(gameBoard.getCell(row,col) !== ""){
-            document.querySelector("h1").innerText = "The cell is taken";
-            return;
-        }
-        document.querySelector("h1").innerText = "Nice Move!";
-        gameBoard.setCell(row, col, "X");
-        if (gameController.checkIfOver()) {
-            gameController.endGame();
-            return;
-        }
-        event.target.style.backgroundColor = "lightblue";
-        gameController.makeAMove();
+    for (let i = 0; i < 9; i++) {
+        let fieldDiv = document.createElement("div");
+        fieldDiv.setAttribute("class", "field-div");
+        fieldDiv.setAttribute("data-id", i);
+        boardDisplay.appendChild(fieldDiv);
     }
-});
 
-function displayMove(row, col) {
-    const index = row * 3 + col; // convert back to flat index
-    const cell = document.querySelector(`[data-id="${index}"]`);
-    cell.style.backgroundColor = "tomato";
-}
+    boardDisplay.addEventListener("click", (event) => {
+        if (event.target.classList.contains("field-div")) {
+            const fieldId = Number(event.target.dataset.id);
+            const row = Math.floor(fieldId / 3);
+            const col = fieldId % 3;
+            if (gameBoard.getCell(row, col) !== "") {
+                document.querySelector("h1").innerText = "The cell is taken";
+                return;
+            }
+            document.querySelector("h1").innerText = "Nice Move!";
+            gameBoard.setCell(row, col, "X");
+            if (gameController.checkIfOver()) {
+                gameController.endGame();
+                return;
+            }
+            displayController.displayBoard();
+            setTimeout(() => {
+                gameController.makeAMove();
+                displayController.displayBoard();
+            }, 500);
+        }
+    });
 
-document.body.appendChild(boardDisplay);
+    document.body.appendChild(boardDisplay);
+
+    const displayBoard = () => {
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+                if (gameBoard.getCell(row, col) === "X") {
+                    const index = row * 3 + col; // convert back to flat index
+                    const cell = document.querySelector(`[data-id="${index}"]`);
+                    cell.style.backgroundColor = "tomato";
+                }
+                else if (gameBoard.getCell(row, col) === "O") {
+                    const index = row * 3 + col; // convert back to flat index
+                    const cell = document.querySelector(`[data-id="${index}"]`);
+                    cell.style.backgroundColor = "lightblue";
+                }
+            }
+        }
+    }
+    return {displayBoard};
+})(gameBoard);
 
 
 
